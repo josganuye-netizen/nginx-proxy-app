@@ -1,0 +1,42 @@
+{
+  "log": { "loglevel": "warning" },
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 18080,
+      "protocol": "vless",
+      "settings": { "clients": [], "decryption": "none" },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "none",
+        "xhttpSettings": { "path": "/xhttp", "mode": "auto" }
+      },
+      "tag": "vless-xhttp"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": 18081,
+      "protocol": "vless",
+      "settings": { "clients": [], "decryption": "none" },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "security": "none",
+        "httpupgradeSettings": { "path": "/httpup" }
+      },
+      "tag": "vless-httpupgrade"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": 18082,
+      "protocol": "vless",
+      "settings": { "clients": [], "decryption": "none" },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": { "path": "/vless" }
+      },
+      "tag": "vless-ws"
+    }
+  ],
+  "outbounds": [{ "protocol": "freedom", "tag": "direct" }]
+}
