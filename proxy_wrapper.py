@@ -65,11 +65,18 @@ async def handle_client(client_reader, client_writer):
 
             if any(path.startswith(p) for p in XRAY_PATHS):
                 host_header = next((l for l in lines if l.lower().startswith("host:")), "Host: localhost")
+                ws_headers = [l for l in lines[1:] if l.lower().startswith("sec-websocket-")]
+                if not any(h.lower().startswith("sec-websocket-key:") for h in ws_headers):
+                    ws_headers.append("Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==")
+                if not any(h.lower().startswith("sec-websocket-version:") for h in ws_headers):
+                    ws_headers.append("Sec-WebSocket-Version: 13")
+                extra = "\r\n".join(ws_headers) + "\r\n"
                 clean_request = (
                     f"GET {path} HTTP/1.1\r\n"
                     f"{host_header}\r\n"
                     f"Upgrade: websocket\r\n"
-                    f"Connection: Upgrade\r\n\r\n"
+                    f"Connection: Upgrade\r\n"
+                    f"{extra}\r\n"
                 ).encode("latin-1")
 
                 up_reader, up_writer = await asyncio.open_connection(NGINX_HOST, NGINX_PORT)
