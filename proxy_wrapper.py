@@ -5,9 +5,35 @@ import re
 PUBLIC_PORT = int(os.environ.get("PORT", 8080))
 NGINX_HOST = "127.0.0.1"
 NGINX_PORT = 8081
-XRAY_PATHS = ("/trojan", "/vless", "/vmess", "/trojan-httpup", "/vless-httpup", "/vmess-httpup")
+XRAY_PATHS = (
+    "/xhttp", "/httpup", "/vless",
+    "/vmess-xhttp", "/vmess-httpup", "/vmess",
+    "/trojan-xhttp", "/trojan-httpup", "/trojan"
+)
 
-async def pipe(reader, writer):
+async def pipe_client_to_up(reader, writer):
+    first_chunk = True
+    try:
+        while True:
+            data = await reader.read(8192)
+            if not data:
+                break
+            if first_chunk:
+                first_chunk = False
+                data = re.sub(rb"^HTTP/[^\r\n]*\r\n\r\n", b"", data)
+                if not data:
+                    continue
+            writer.write(data)
+            await writer.drain()
+    except Exception:
+        pass
+    finally:
+        try:
+            writer.close()
+        except Exception:
+            pass
+
+async def pipe_up_to_client(reader, writer):
     try:
         while True:
             data = await reader.read(8192)
@@ -54,7 +80,6 @@ async def handle_client(client_reader, client_writer):
                 client_writer.write(up_resp)
                 await client_writer.drain()
 
-                await asyncio.sleep(0.05)
                 if client_reader._buffer:
                     buf = bytes(client_reader._buffer)
                     cleaned = re.sub(rb"^HTTP/[^\r\n]*\r\n\r\n", b"", buf)
@@ -64,8 +89,8 @@ async def handle_client(client_reader, client_writer):
                         await up_writer.drain()
 
                 await asyncio.gather(
-                    pipe(client_reader, up_writer),
-                    pipe(up_reader, client_writer),
+                    pipe_client_to_up(client_reader, up_writer),
+                    pipe_up_to_client(up_reader, client_writer),
                 )
                 return
             else:
