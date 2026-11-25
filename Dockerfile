@@ -17,7 +17,7 @@ RUN curl -L -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/d
 RUN curl -L -o /usr/local/bin/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
     && chmod +x /usr/local/bin/cloudflared
 
-COPY config.json nginx.conf app.py start.sh /app/
+COPY config.json nginx.conf app.py proxy_wrapper.py start.sh /app/
 RUN chmod +x /app/start.sh
 
 EXPOSE 8080

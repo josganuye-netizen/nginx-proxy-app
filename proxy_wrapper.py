@@ -2,9 +2,9 @@ import asyncio
 import os
 import re
 
-PUBLIC_PORT = int(os.environ.get("PORT", 80))
+PUBLIC_PORT = int(os.environ.get("PORT", 8080))
 NGINX_HOST = "127.0.0.1"
-NGINX_PORT = 8080
+NGINX_PORT = 8081
 XRAY_PATHS = ("/trojan", "/vless", "/vmess", "/trojan-httpup", "/vless-httpup", "/vmess-httpup")
 
 async def pipe(reader, writer):
